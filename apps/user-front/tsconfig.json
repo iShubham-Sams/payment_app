@@ -1,18 +1,11 @@
 {
-  "extends": "@repo/typescript-config/react.json",
+   "extends": "@repo/typescript-config/react.json",
   "compilerOptions": {
-    "plugins": [
-      {
-        "name": "next"
-      }
-    ]
+    "declaration":false, 
+    "composite": false,
+    "declarationMap": false,
+     "outDir": "dist"
   },
-  "include": [
-    "next-env.d.ts",
-    "next.config.mjs",
-    "**/*.ts",
-    "**/*.tsx",
-    ".next/types/**/*.ts"
-  ],
+  "include": ["src"],
   "exclude": ["node_modules"]
 }
