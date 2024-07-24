@@ -4,8 +4,8 @@
     "declaration":false, 
     "composite": false,
     "declarationMap": false,
-     "outDir": "dist"
+     "outDir": "dist",
   },
-  "include": ["src"],
+  "include": ["src","."],
   "exclude": ["node_modules"]
 }
