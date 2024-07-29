@@ -10,7 +10,7 @@ import { asyncHandler } from "../utils/asyncHandler";
 import { ApiError } from "../utils/apiError";
 import { ApiResponse } from "../utils/apiResponse";
 import HttpStatusCode from "../utils/statusCode";
-// import { loginUserZodSchema, registerUserZodSchema, updateAccountDetailsZodSchema } from "../../../../packages/zod-schema/src/schema/user.zodSchema.js";
+// import { loginUserZodSchema, registerUserZodSchema, updateAccountDetailsZodSchema } from "@repo/zod-validation/userValidate";
 import { CustomRequest } from "../types/share.js";
 
 const generateAccessToken = (userId: number, email: string, name: string, number: string) => {
@@ -56,111 +56,113 @@ const generateAccessAndRefreshToken = async (userId: number, email: string, name
     }
 };
 
-// const registerUser = asyncHandler(async (req: Request, res: Response) => {
-//     const {
-//         body: { email, name, password, number },
-//     } = await registerUserZodSchema.parseAsync(req);
+const registerUser = asyncHandler(async (req: Request, res: Response) => {
+    // const {
+    //     body: { email, name, password, number },
+    // } = await registerUserZodSchema.parseAsync(req);
+    let email = ''; let name = ''; let password = ''; let number = ''
+    let existedUser = await prisma.user.findUnique(({
+        where: {
+            email: email
+        }
+    }));
 
-//     let existedUser = await prisma.user.findUnique(({
-//         where: {
-//             email: email
-//         }
-//     }));
+    if (existedUser) {
+        throw new ApiError(
+            "User with email or username already exists",
+            HttpStatusCode.CONFLICT,
+            "Conflict"
+        );
+    }
+    const user = await prisma.user.create({
+        data: {
+            email,
+            name,
+            number,
+            password
+        }
+    })
 
-//     if (existedUser) {
-//         throw new ApiError(
-//             "User with email or username already exists",
-//             HttpStatusCode.CONFLICT,
-//             "Conflict"
-//         );
-//     }
-//     const user = await prisma.user.create({
-//         data: {
-//             email,
-//             name,
-//             number,
-//             password
-//         }
-//     })
+    const userCreateDone = await prisma.user.findUnique({
+        where: {
+            id: user.id
+        },
+        select: {
+            id: true,
+            name: true,
+            email: true,
+            password: false,
+            refreshToken: false,
+        }
+    })
 
-//     const userCreateDone = await prisma.user.findUnique({
-//         where: {
-//             id: user.id
-//         },
-//         select: {
-//             id: true,
-//             name: true,
-//             email: true,
-//             password: false,
-//             refreshToken: false,
-//         }
-//     })
+    if (!userCreateDone) {
+        throw ApiError.ServerError("Something went wrong while registering user");
+    }
 
-//     if (!userCreateDone) {
-//         throw ApiError.ServerError("Something went wrong while registering user");
-//     }
+    return res
+        .status(HttpStatusCode.CREATED)
+        .json(
+            new ApiResponse(
+                HttpStatusCode.OK,
+                userCreateDone,
+                "User register successfully"
+            )
+        );
+});
 
-//     return res
-//         .status(HttpStatusCode.CREATED)
-//         .json(
-//             new ApiResponse(
-//                 HttpStatusCode.OK,
-//                 userCreateDone,
-//                 "User register successfully"
-//             )
-//         );
-// });
+const loginUser = asyncHandler(async (req: Request, res: Response) => {
+    // const {
+    //     body: { password, email },
+    // } = await loginUserZodSchema.parseAsync(req);
+    let password = '';
+    let email = ''
+    if (!email) {
+        throw new ApiError(
+            "User name or Email required",
+            HttpStatusCode.BAD_REQUEST,
+            "BadRequest"
+        );
+    }
+    const user = await prisma.user.findUnique({
+        where: { email: email }
+    })
+    if (!user) {
+        throw new ApiError(
+            "User does not exist",
+            HttpStatusCode.NOT_FOUND,
+            "NotFound"
+        );
+    }
+    const correctPassword = await bcrypt.compare(password, user.password);;
+    if (!correctPassword) {
+        throw new ApiError(
+            "Invalid user credentials",
+            HttpStatusCode.BAD_REQUEST,
+            "BadRequest"
+        );
+    }
+    const { accessToken, refreshToken } = await generateAccessAndRefreshToken(
+        user.id, user.email, user.name, user.number
+    );
 
-// const loginUser = asyncHandler(async (req: Request, res: Response) => {
-//     const {
-//         body: { password, email },
-//     } = await loginUserZodSchema.parseAsync(req);
-//     if (!email) {
-//         throw new ApiError(
-//             "User name or Email required",
-//             HttpStatusCode.BAD_REQUEST,
-//             "BadRequest"
-//         );
-//     }
-//     const user = await prisma.user.findUnique({
-//         where: { email: email }
-//     })
-//     if (!user) {
-//         throw new ApiError(
-//             "User does not exist",
-//             HttpStatusCode.NOT_FOUND,
-//             "NotFound"
-//         );
-//     }
-//     const correctPassword = await bcrypt.compare(password, user.password);;
-//     if (!correctPassword) {
-//         throw new ApiError(
-//             "Invalid user credentials",
-//             HttpStatusCode.BAD_REQUEST,
-//             "BadRequest"
-//         );
-//     }
-//     const { accessToken, refreshToken } = await generateAccessAndRefreshToken(
-//         user.id, user.email, user.name, user.number
-//     );
-
-//     const cookieOptions = {
-//         httpOnly: true,
-//         secure: true,
-//         sameSite: "lax"
-//     } as { sameSite: "lax" | "none" | "strict", httpOnly: boolean, secure: boolean }
-//     return res
-//         .status(HttpStatusCode.OK)
-//         .cookie("accessToken", accessToken, cookieOptions)
-//         .cookie("refreshToken", refreshToken, cookieOptions)
-//         .json(
-//             new ApiResponse(
-//                 HttpStatusCode.OK,
-//                 { accessToken, refreshToken },
-//                 "User login Successfully"
-//             )
-//         );
-// });
+    const cookieOptions = {
+        httpOnly: true,
+        secure: true,
+        sameSite: "lax"
+    } as { sameSite: "lax" | "none" | "strict", httpOnly: boolean, secure: boolean }
+    return res
+        .status(HttpStatusCode.OK)
+        .cookie("accessToken", accessToken, cookieOptions)
+        .cookie("refreshToken", refreshToken, cookieOptions)
+        .json(
+            new ApiResponse(
+                HttpStatusCode.OK,
+                { accessToken, refreshToken },
+                "User login Successfully"
+            )
+        );
+});
 
 const logOutUser = asyncHandler(async (req: CustomRequest, res: Response) => {
     let email = req.user.email as string
@@ -247,47 +249,49 @@ const getCurrentUser = asyncHandler(
     }
 );
 
-// const updateAccountDetails = asyncHandler(
-//     async (req: CustomRequest, res: Response) => {
-//         const {
-//             body: { email, name, password },
-//         } = await updateAccountDetailsZodSchema.parseAsync(req);
+const updateAccountDetails = asyncHandler(
+    async (req: CustomRequest, res: Response) => {
+        let email = ''; let name = '';
+        let password = ''
+        // const {
+        //     body: { email, name, password },
+        // } = await updateAccountDetailsZodSchema.parseAsync(req);
 
-//         const updatedUser = await prisma.user.update({
-//             where: {
-//                 id: req.user._id
-//             },
-//             data: {
-//                 email,
-//                 name,
-//                 password
-//             },
-//             select: {
-//                 id: true,
-//                 name: true,
-//                 email: true,
-//                 password: false,
-//                 refreshToken: false,
-//             }
-//         })
-//         return res
-//             .status(HttpStatusCode.OK)
-//             .json(
-//                 new ApiResponse(
-//                     HttpStatusCode.OK,
-//                     updatedUser,
-//                     "User update successfully"
-//                 )
-//             );
-//     }
-// );
+        const updatedUser = await prisma.user.update({
+            where: {
+                id: req.user._id
+            },
+            data: {
+                email,
+                name,
+                password
+            },
+            select: {
+                id: true,
+                name: true,
+                email: true,
+                password: false,
+                refreshToken: false,
+            }
+        })
+        return res
+            .status(HttpStatusCode.OK)
+            .json(
+                new ApiResponse(
+                    HttpStatusCode.OK,
+                    updatedUser,
+                    "User update successfully"
+                )
+            );
+    }
+);
 
 
 export {
-    // registerUser,
-    // loginUser,
+    registerUser,
+    loginUser,
     logOutUser,
     refreshAccessToken,
     getCurrentUser,
-    // updateAccountDetails,
+    updateAccountDetails,
 };

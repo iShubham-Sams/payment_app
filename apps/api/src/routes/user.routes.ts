@@ -1,17 +1,14 @@
-// import zodValidate from "@repo/zod-schema/zodValidator";
+// import zodValidate from "@repo/zod-validation/zodValidate";
+// import { registerUserZodSchema, loginUserZodSchema } from '@repo/zod-validation/userValidate';
 import {
     getCurrentUser,
     logOutUser,
-    // loginUser,
+    loginUser,
     refreshAccessToken,
-    // registerUser,
-    // updateAccountDetails,
+    registerUser,
+    updateAccountDetails,
 } from "../controllers/user.controller.js";
 import { Router } from "express";
-// import {
-//     loginUserZodSchema,
-//     registerUserZodSchema,
-// } from "@repo/zod-schema/userZodSchema";
 import { verifyJwt } from "../middlewares/auth.middleware.js";
 
 const router = Router();
