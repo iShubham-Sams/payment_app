@@ -1,8 +1,8 @@
-import prisma from "../db/index.js";
+import prisma from "@repo/db/client";
 import jwt from "jsonwebtoken";
 import { Request, Response } from "express";
 import { config } from "dotenv";
-import bcrypt from "bcrypt"
+import bcrypt from "bcryptjs"
 config({
     path: "./.env",
 });
@@ -10,7 +10,7 @@ import { asyncHandler } from "../utils/asyncHandler";
 import { ApiError } from "../utils/apiError";
 import { ApiResponse } from "../utils/apiResponse";
 import HttpStatusCode from "../utils/statusCode";
-// import { loginUserZodSchema, registerUserZodSchema, updateAccountDetailsZodSchema } from "@repo/zod-validation/userValidate";
+import { loginUserZodSchema, registerUserZodSchema, updateAccountDetailsZodSchema } from "@repo/zod/user";
 import { CustomRequest } from "../types/share.js";
 
 const generateAccessToken = (userId: number, email: string, name: string, number: string) => {
@@ -57,10 +57,9 @@ const generateAccessAndRefreshToken = async (userId: number, email: string, name
 };
 
 const registerUser = asyncHandler(async (req: Request, res: Response) => {
-    // const {
-    //     body: { email, name, password, number },
-    // } = await registerUserZodSchema.parseAsync(req);
-    let email = ''; let name = ''; let password = ''; let number = ''
+    let {
+        body: { email, name, password, number },
+    } = await registerUserZodSchema.parseAsync(req);
     let existedUser = await prisma.user.findUnique(({
         where: {
             email: email
@@ -74,6 +73,7 @@ const registerUser = asyncHandler(async (req: Request, res: Response) => {
             "Conflict"
         );
     }
+    password = await bcrypt.hash(password, 10);
     const user = await prisma.user.create({
         data: {
             email,
@@ -112,11 +112,9 @@ const registerUser = asyncHandler(async (req: Request, res: Response) => {
 });
 
 const loginUser = asyncHandler(async (req: Request, res: Response) => {
-    // const {
-    //     body: { password, email },
-    // } = await loginUserZodSchema.parseAsync(req);
-    let password = '';
-    let email = ''
+    const {
+        body: { password, email },
+    } = await loginUserZodSchema.parseAsync(req);
     if (!email) {
         throw new ApiError(
             "User name or Email required",
@@ -134,7 +132,7 @@ const loginUser = asyncHandler(async (req: Request, res: Response) => {
             "NotFound"
         );
     }
-    const correctPassword = await bcrypt.compare(password, user.password);;
+    const correctPassword = await bcrypt.compare(password, user.password);
     if (!correctPassword) {
         throw new ApiError(
             "Invalid user credentials",
@@ -251,11 +249,10 @@ const getCurrentUser = asyncHandler(
 
 const updateAccountDetails = asyncHandler(
     async (req: CustomRequest, res: Response) => {
-        let email = ''; let name = '';
-        let password = ''
-        // const {
-        //     body: { email, name, password },
-        // } = await updateAccountDetailsZodSchema.parseAsync(req);
+
+        const {
+            body: { email, name, password },
+        } = await updateAccountDetailsZodSchema.parseAsync(req);
 
         const updatedUser = await prisma.user.update({
             where: {

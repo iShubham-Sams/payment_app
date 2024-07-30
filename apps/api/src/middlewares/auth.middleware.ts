@@ -4,7 +4,7 @@ import { ApiError } from "../utils/apiError.js";
 import jwt from "jsonwebtoken";
 import { config } from "dotenv";
 import { CustomRequest } from "../types/share.js";
-import prisma from "../db/index.js";
+import prisma from "@repo/db/client"
 config({
     path: "./.env",
 });
