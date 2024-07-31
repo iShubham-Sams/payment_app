@@ -2,13 +2,26 @@
   "name": "@repo/db",
   "version": "1.0.0",
   "dependencies": {
-    "@prisma/client": "^5.17.0"
+    "@prisma/client": "^5.17.0",
+    "bcryptjs": "^2.4.3"
   },
-  "exports":{
-    "./client":"./index.ts"
+  "exports": {
+    "./client": "./index.ts"
+  },
+  "scripts": {
+    "db:migrate:dev": "prisma migrate dev",
+    "db:seed": "tsx prisma/seed.ts",
+    "generate": "prisma generate",
+    "studio": "prisma studio"
   },
   "devDependencies": {
+    "@repo/eslint-config": "*",
     "@repo/typescript-config": "*",
-    "typescript": "latest"
+    "eslint": "^8.57.0",
+    "prisma": "^5.17.0",
+    "rimraf": "^5.0.5",
+    "tsup": "^8.0.2",
+    "tsx": "^4.7.1",
+    "typescript": "^5.3.3"
   }
 }
