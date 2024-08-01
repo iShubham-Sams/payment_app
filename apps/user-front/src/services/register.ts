@@ -3,6 +3,7 @@ import { createApi } from '@reduxjs/toolkit/query/react'
 import axiosBaseQuery from '../lib/axios'
 import { logInRegisterInstance } from '../lib/axios/instances'
 import { apiRoutes } from '../lib/apiRoute'
+import { UserRegisterFormData } from '@repo/zod/user';
 interface RegisterUserRes {
     statusCode: number;
     data: Data;
@@ -19,7 +20,7 @@ export const registerUser = createApi({
     reducerPath: 'registerUser',
     baseQuery: axiosBaseQuery(logInRegisterInstance),
     endpoints: (builder) => ({
-        createUser: builder.mutation<RegisterUserRes, string>({
+        createUser: builder.mutation<RegisterUserRes, UserRegisterFormData>({
             query: (data) => ({
                 url: apiRoutes.register,
                 method: "post",
