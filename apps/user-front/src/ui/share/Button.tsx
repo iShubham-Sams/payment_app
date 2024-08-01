@@ -5,7 +5,7 @@ import classNames from "classnames";
 
 type ButtonProps = {
   children: ReactNode;
-  onClick: () => void;
+  onClick?: () => void;
   type?: "button";
   variant?: "primary" | "secondary" | "success" | "danger";
   size?: "md" | "sm" | "lg";
