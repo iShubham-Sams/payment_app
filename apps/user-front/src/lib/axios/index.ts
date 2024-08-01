@@ -1,5 +1,4 @@
 import { AxiosInstance } from "axios";
-import { authenticateInstance } from "./instances";
 
 const axiosBaseQuery = (instance: AxiosInstance) =>
     async ({ url, method, data, params, headers, body }: {

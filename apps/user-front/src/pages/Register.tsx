@@ -17,7 +17,7 @@ const Register: React.FC = () => {
   const navigate = useNavigate();
   const { NotificationComponent, triggerNotification } =
     useNotification("top-right");
-  const [updateJokes, isLoading] = useCreateUserMutation();
+  const [registerUser, dataHook] = useCreateUserMutation();
   const {
     register,
     handleSubmit,
@@ -26,7 +26,7 @@ const Register: React.FC = () => {
     resolver: zodResolver(registerUserZodSchema),
   });
   const onSubmit: SubmitHandler<UserRegisterFormData> = (data) => {
-    updateJokes(data)
+    registerUser(data)
       .unwrap()
       .then(async (res) => {
         triggerNotification({
@@ -39,7 +39,12 @@ const Register: React.FC = () => {
         navigate("/auth/login");
       })
       .catch((err) => {
-        console.log(err);
+        triggerNotification({
+          type: "error",
+          message: "Something went wrong",
+          duration: 3000,
+          animation: "pop",
+        });
       });
   };
 
@@ -84,7 +89,7 @@ const Register: React.FC = () => {
           <Button
             type="submit"
             className="w-full"
-            disabled={isLoading.isLoading}
+            disabled={dataHook.isLoading}
           >
             Register
           </Button>

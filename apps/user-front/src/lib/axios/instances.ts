@@ -9,7 +9,7 @@ export const logInRegisterInstance = axios.create({
 })
 
 export const authenticateInstance = axios.create({
-    baseURL: import.meta.env.BASE_URL,
+    baseURL: import.meta.env.VITE_BASE_URL,
     headers: {
         "Content-Type": "application/json"
     },

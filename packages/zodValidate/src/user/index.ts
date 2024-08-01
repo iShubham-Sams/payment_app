@@ -16,7 +16,7 @@ export const registerUserZodSchema = z.object({
         .email(),
     number: z.string({
         required_error: "number required",
-    }),
+    }).regex(/^(\[\-\s]?)?[0]?(91)?[789]\d{9}$/),
     password: z.string({
         required_error: "Password required",
     }),

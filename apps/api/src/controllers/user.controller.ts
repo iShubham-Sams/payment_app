@@ -72,7 +72,7 @@ const registerUser = asyncHandler(async (req: Request, res: Response) => {
         data: {
             email,
             name,
-            number,
+            number: `+91${number}`,
             password
         }
     })
