@@ -57,7 +57,6 @@ const generateAccessAndRefreshToken = async (userId: number, email: string, name
 };
 
 const registerUser = asyncHandler(async (req: Request, res: Response) => {
-    console.log('object');
     let { email, name, password, number } = await registerUserZodSchema.parseAsync(req.body);
     let existedUser = await prisma.user.findUnique(({
         where: {
@@ -66,11 +65,7 @@ const registerUser = asyncHandler(async (req: Request, res: Response) => {
     }));
 
     if (existedUser) {
-        throw new ApiError(
-            "User with email or username already exists",
-            HttpStatusCode.CONFLICT,
-            "Conflict"
-        );
+        res.status(HttpStatusCode.CONFLICT).json(ApiError.Conflict("User with email or username already exists"))
     }
     password = await bcrypt.hash(password, 10);
     const user = await prisma.user.create({

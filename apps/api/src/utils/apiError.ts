@@ -1,6 +1,7 @@
 import HttpStatusCode from "./statusCode";
 
 class ApiError extends Error {
+    message: string;
     statusCode: number;
     errorName: string;
     constructor(
@@ -8,7 +9,8 @@ class ApiError extends Error {
         statusCode: number,
         errorName: string
     ) {
-        super(message);
+        super()
+        this.message = message
         this.statusCode = statusCode;
         this.errorName = errorName;
     }

@@ -6,8 +6,12 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { registerUserZodSchema, UserRegisterFormData } from "@repo/zod/user";
 import Button from "../ui/share/Button";
 import { useCreateUserMutation } from "../services/register";
+import { redirect } from "react-router-dom";
+import useNotification from "../ui/share/toast/useNotification";
 
 const Register: React.FC = () => {
+  const { NotificationComponent, triggerNotification } =
+    useNotification("top-left");
   const [updateJokes, isLoading] = useCreateUserMutation();
   const {
     register,
@@ -17,18 +21,26 @@ const Register: React.FC = () => {
     resolver: zodResolver(registerUserZodSchema),
   });
   const onSubmit: SubmitHandler<UserRegisterFormData> = (data) => {
-    updateJokes(data)
-      .unwrap()
-      .then((res) => {
-        console.log(res);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
+    // updateJokes(data)
+    //   .unwrap()
+    //   .then((res) => {
+    //     redirect("/login");
+    //   })
+    //   .catch((err) => {
+    //     console.log(err);
+    //   });
+    console.log(data);
+    triggerNotification({
+      type: "success",
+      message: "This is a success message!",
+      duration: 3000,
+      animation: "pop",
+    });
   };
 
   return (
     <div className="flex justify-center items-center h-[100vh]">
+      {NotificationComponent}
       <div className="max-w-md mx-auto mt-10 p-6 bg-white shadow-md rounded-md w-full">
         <h2 className="text-2xl font-semibold mb-4">Register</h2>
         <form onSubmit={handleSubmit(onSubmit)}>
@@ -64,7 +76,11 @@ const Register: React.FC = () => {
             required
             error={errors.number}
           />
-          <Button type="submit" className="w-full">
+          <Button
+            type="submit"
+            className="w-full"
+            disabled={isLoading.isLoading}
+          >
             Register
           </Button>
         </form>
