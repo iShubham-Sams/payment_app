@@ -1,19 +1,16 @@
 import type { LoaderFunctionArgs } from "react-router-dom";
 import {
-  Form,
   RouterProvider,
   createBrowserRouter,
   redirect,
-  useActionData,
-  useLocation,
-  useNavigation,
 } from "react-router-dom";
 import { fakeAuthProvider } from "./auth";
-import HomePage from "./pages/HomePage";
+import Home from "./pages/Home";
 import ErrorPage from "./error-page";
 import Register from "./pages/Register";
 import { authLoader } from "./lib/authLoader";
 import "./App.css";
+import Login from "./pages/Login";
 
 const router = createBrowserRouter([
   {
@@ -23,7 +20,7 @@ const router = createBrowserRouter([
       return { user: fakeAuthProvider.username };
     },
     errorElement: <ErrorPage />,
-    Component: HomePage,
+    Component: Home,
     // children: [
     //   {
     //     index: true,
@@ -41,7 +38,7 @@ const router = createBrowserRouter([
     children: [
       {
         path: "login",
-        Component: LoginPage,
+        Component: Login,
         loader: authLoader,
       },
       {
@@ -66,48 +63,11 @@ export default function App() {
   );
 }
 
-function LoginPage() {
-  let location = useLocation();
-  let params = new URLSearchParams(location.search);
-  let from = params.get("from") || "/";
-
-  let navigation = useNavigation();
-  let isLoggingIn = navigation.formData?.get("username") != null;
-
-  let actionData = useActionData() as { error: string } | undefined;
-
-  return (
-    <div>
-      <p>You must log in to view the page at {from}</p>
-
-      <Form method="post" replace>
-        <input type="hidden" name="redirectTo" value={from} />
-        <label>
-          Username: <input name="username" />
-        </label>{" "}
-        <button type="submit" disabled={isLoggingIn}>
-          {isLoggingIn ? "Logging in..." : "Login"}
-        </button>
-        {actionData && actionData.error ? (
-          <p style={{ color: "red" }}>{actionData.error}</p>
-        ) : null}
-      </Form>
-    </div>
-  );
-}
-
 function protectedLoader({ request }: LoaderFunctionArgs) {
-  // If the user is not logged in and tries to access `/protected`, we redirect
-  // them to `/login` with a `from` parameter that allows login to redirect back
-  // to this page upon successful authentication
   if (!fakeAuthProvider.isAuthenticated) {
     let params = new URLSearchParams();
     params.set("from", new URL(request.url).pathname);
     return redirect("/login?" + params.toString());
   }
   return null;
-}
-
-function ProtectedPage() {
-  return <h3>Protected</h3>;
 }

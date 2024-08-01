@@ -1,7 +1,7 @@
 import NavBarRenderEle from "../ui/Home/NavBarRenderEle";
 import Navbar from "../ui/share/Navbar";
 
-const HomePage = () => {
+const Home = () => {
   return (
     <div>
       <Navbar render={<NavBarRenderEle />} />
@@ -21,4 +21,4 @@ const HomePage = () => {
   );
 };
 
-export default HomePage;
+export default Home;

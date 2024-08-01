@@ -22,25 +22,24 @@ export const registerUserZodSchema = z.object({
     }),
 });
 
+export type LoginUser = z.infer<typeof loginUserZodSchema>
 export const loginUserZodSchema = z.object({
-    body: z.object({
-        username: z
-            .string({
-                required_error: "Email or username required",
-                invalid_type_error: "User name must be a string",
-            })
-            .min(8)
-            .optional(),
-        email: z
-            .string({
-                required_error: "Email is required",
-                invalid_type_error: "Please send valid email",
-            })
-            .email()
-            .optional(),
-        password: z.string({
-            required_error: "Password required",
-        }),
+    username: z
+        .string({
+            required_error: "Email or username required",
+            invalid_type_error: "User name must be a string",
+        })
+        .min(8)
+        .optional(),
+    email: z
+        .string({
+            required_error: "Email is required",
+            invalid_type_error: "Please send valid email",
+        })
+        .email()
+        .optional(),
+    password: z.string({
+        required_error: "Password required",
     }),
 });
 

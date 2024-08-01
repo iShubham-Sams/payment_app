@@ -6,14 +6,16 @@ import classNames from "classnames";
 type ButtonProps = {
   children: ReactNode;
   onClick?: () => void;
-  type?: "button";
+  type?: "button" | "submit";
   variant?: "primary" | "secondary" | "success" | "danger";
   size?: "md" | "sm" | "lg";
   disabled?: boolean;
+  className?: string;
 };
 const Button = ({
   children,
   onClick,
+  className,
   type = "button",
   variant = "primary",
   size = "md",
@@ -41,7 +43,8 @@ const Button = ({
     sizes[size],
     {
       "opacity-50 cursor-not-allowed": disabled,
-    }
+    },
+    className
   );
 
   return (

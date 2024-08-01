@@ -110,9 +110,8 @@ const registerUser = asyncHandler(async (req: Request, res: Response) => {
 });
 
 const loginUser = asyncHandler(async (req: Request, res: Response) => {
-    const {
-        body: { password, email },
-    } = await loginUserZodSchema.parseAsync(req);
+    const { password, email
+    } = await loginUserZodSchema.parseAsync(req.body);
     if (!email) {
         throw new ApiError(
             "User name or Email required",
