@@ -5,8 +5,10 @@ import Input from "../ui/share/Input";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { registerUserZodSchema, UserRegisterFormData } from "@repo/zod/user";
 import Button from "../ui/share/Button";
+import { useCreateUserMutation } from "../services/register";
 
 const Register: React.FC = () => {
+  const [updateJokes, isLoading] = useCreateUserMutation();
   const {
     register,
     handleSubmit,
@@ -15,8 +17,14 @@ const Register: React.FC = () => {
     resolver: zodResolver(registerUserZodSchema),
   });
   const onSubmit: SubmitHandler<UserRegisterFormData> = (data) => {
-    console.log(data);
-    // Handle form submission, e.g., send the data to an API
+    updateJokes(data)
+      .unwrap()
+      .then((res) => {
+        console.log(res);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
   };
 
   return (

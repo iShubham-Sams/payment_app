@@ -2,7 +2,6 @@
   "name": "@repo/zod",
   "type": "module",
   "exports": {
-    "./zodValidate": "./src/index.ts",
     "./user":"./src/user/index.ts"
   },
   "devDependencies": {

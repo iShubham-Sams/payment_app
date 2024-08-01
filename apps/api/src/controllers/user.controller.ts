@@ -57,6 +57,7 @@ const generateAccessAndRefreshToken = async (userId: number, email: string, name
 };
 
 const registerUser = asyncHandler(async (req: Request, res: Response) => {
+    console.log('object');
     let { email, name, password, number } = await registerUserZodSchema.parseAsync(req.body);
     let existedUser = await prisma.user.findUnique(({
         where: {

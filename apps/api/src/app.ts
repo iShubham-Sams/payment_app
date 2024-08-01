@@ -1,6 +1,8 @@
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
+import env from 'dotenv'
+env.config()
 
 var corsOptions = {
     origin: process.env.CORS_ORIGIN,
