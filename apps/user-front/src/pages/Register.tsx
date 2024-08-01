@@ -6,12 +6,17 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { registerUserZodSchema, UserRegisterFormData } from "@repo/zod/user";
 import Button from "../ui/share/Button";
 import { useCreateUserMutation } from "../services/register";
-import { redirect } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import useNotification from "../ui/share/toast/useNotification";
 
 const Register: React.FC = () => {
+  async function resolveInTwoSeconds() {
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+    return Promise.resolve();
+  }
+  const navigate = useNavigate();
   const { NotificationComponent, triggerNotification } =
-    useNotification("top-left");
+    useNotification("top-right");
   const [updateJokes, isLoading] = useCreateUserMutation();
   const {
     register,
@@ -21,21 +26,21 @@ const Register: React.FC = () => {
     resolver: zodResolver(registerUserZodSchema),
   });
   const onSubmit: SubmitHandler<UserRegisterFormData> = (data) => {
-    // updateJokes(data)
-    //   .unwrap()
-    //   .then((res) => {
-    //     redirect("/login");
-    //   })
-    //   .catch((err) => {
-    //     console.log(err);
-    //   });
-    console.log(data);
-    triggerNotification({
-      type: "success",
-      message: "This is a success message!",
-      duration: 3000,
-      animation: "pop",
-    });
+    updateJokes(data)
+      .unwrap()
+      .then(async (res) => {
+        triggerNotification({
+          type: "success",
+          message: "User register successfully",
+          duration: 3000,
+          animation: "pop",
+        });
+        await resolveInTwoSeconds();
+        navigate("/auth/login");
+      })
+      .catch((err) => {
+        console.log(err);
+      });
   };
 
   return (
@@ -71,7 +76,7 @@ const Register: React.FC = () => {
           <Input
             id="number"
             label="Mobile Number"
-            type="number"
+            type="text"
             register={register}
             required
             error={errors.number}
